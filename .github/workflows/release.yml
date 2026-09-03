@@ -11,6 +11,8 @@ permissions:
 jobs:
   release:
     runs-on: macos-latest
+    env:
+      BUNDLE_WITHOUT: runtime
     steps:
       - uses: actions/checkout@v4
 
