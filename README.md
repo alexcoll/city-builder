@@ -19,9 +19,24 @@ A barebones Cities: Skylines-style game built with the Ruby Gosu game engine.
 ## Setup
 
 ```bash
-gem install gosu rspec rubocop
+bundle install
 ruby main.rb
 ```
+
+`main.rb` also runs `bundle install` automatically if dependencies aren't present.
+
+## Releases / Deployment
+
+Tagged releases are built automatically by GitHub Actions and hosted free on the
+[Releases page](https://github.com/alexcoll/city-builder/releases). Each release
+ships a zip containing the source plus a `run.command` launcher:
+
+1. Download `city-builder-<version>.zip` from Releases.
+2. Unzip it.
+3. `chmod +x run.command` (macOS), then double-click `run.command` — or run `ruby main.rb` from a terminal.
+4. First launch installs the Gosu dependency automatically.
+
+Requires Ruby 3.0+ and the Gosu system libraries (on macOS: `brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf`).
 
 ## Controls
 
