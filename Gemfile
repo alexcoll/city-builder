@@ -2,6 +2,9 @@
 
 source 'https://rubygems.org'
 
-gem 'gosu'
+group :runtime do
+  gem 'gosu'
+end
+
 gem 'rspec', group: :test
 gem 'rubocop', group: :development
