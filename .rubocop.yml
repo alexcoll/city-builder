@@ -1,6 +1,9 @@
 AllCops:
-  TargetRubyVersion: 3.0
+  TargetRubyVersion: 4.0
   NewCops: enable
+
+Style/Documentation:
+  Enabled: false
 
 Metrics/MethodLength:
   Max: 25
@@ -17,21 +20,6 @@ Metrics/CyclomaticComplexity:
 Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'
-
-Naming/MethodParameterName:
-  Enabled: false
-
-Naming/AccessorMethodName:
-  Enabled: false
-
-Naming/PredicateMethod:
-  Enabled: false
-
-Style/Documentation:
-  Enabled: false
-
-Style/FrozenStringLiteralComment:
-  Enabled: false
 
 Layout/LineLength:
   Max: 120

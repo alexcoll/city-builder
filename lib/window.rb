@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'gosu'
 
 require_relative 'tile'
@@ -76,7 +78,7 @@ class GameWindow < Gosu::Window
     when Gosu::KB_UP, Gosu::KB_W
       # handled in update
     when Gosu::KB_Q
-      @game.set_speed((@game.speed % 3) + 1)
+      @game.change_speed((@game.speed % 3) + 1)
     end
 
     handle_hotkey(id)
@@ -139,12 +141,12 @@ class GameWindow < Gosu::Window
     end
   end
 
-  def draw_tile(x, y, px, py)
-    tile = @game.grid.get(x, y)
-    level = @game.grid.level_at(x, y)
+  def draw_tile(col, row, pixel_x, pixel_y)
+    tile = @game.grid.tile_at(col, row)
+    level = @game.grid.level_at(col, row)
     color = tile_color(tile, level)
-    Gosu.draw_rect(px, py, TILE_SIZE - 1, TILE_SIZE - 1, color)
-    draw_building_details(tile, level, px, py) if level.positive?
+    Gosu.draw_rect(pixel_x, pixel_y, TILE_SIZE - 1, TILE_SIZE - 1, color)
+    draw_building_details(tile, level, pixel_x, pixel_y) if level.positive?
   end
 
   def tile_color(tile, level)
@@ -174,20 +176,20 @@ class GameWindow < Gosu::Window
     )
   end
 
-  def draw_building_details(tile, level, px, py)
+  def draw_building_details(tile, level, pixel_x, pixel_y)
     case tile
     when Tile::RESIDENTIAL
       # Draw a little house shape
-      bx = px + 4
-      by = py + TILE_SIZE - 4 - (level * 4)
+      bx = pixel_x + 4
+      by = pixel_y + TILE_SIZE - 4 - (level * 4)
       Gosu.draw_rect(bx, by, TILE_SIZE - 8, level * 4, Gosu::Color.rgb(50, 80, 50))
     when Tile::COMMERCIAL
-      bx = px + 3
-      by = py + TILE_SIZE - 4 - (level * 5)
+      bx = pixel_x + 3
+      by = pixel_y + TILE_SIZE - 4 - (level * 5)
       Gosu.draw_rect(bx, by, TILE_SIZE - 6, level * 5, Gosu::Color.rgb(70, 120, 180))
     when Tile::INDUSTRIAL
-      bx = px + 2
-      by = py + TILE_SIZE - 4 - (level * 4)
+      bx = pixel_x + 2
+      by = pixel_y + TILE_SIZE - 4 - (level * 4)
       Gosu.draw_rect(bx, by, TILE_SIZE - 4, level * 4, Gosu::Color.rgb(140, 110, 30))
     end
   end
@@ -255,7 +257,7 @@ class GameWindow < Gosu::Window
     return if mouse_x < TOOLBAR_WIDTH
 
     gx, gy = @game.screen_to_grid(mouse_x, mouse_y, @camera_x, @camera_y, TILE_SIZE)
-    @game.place(gx, gy)
+    @game.place_tile?(gx, gy)
   end
 
   def start_drag
@@ -271,6 +273,6 @@ class GameWindow < Gosu::Window
     return unless key_char
 
     tool = TOOLS.find { |t| t[:hotkey] == key_char }
-    @game.set_tool(tool[:key]) if tool
+    @game.select_tool?(tool[:key]) if tool
   end
 end

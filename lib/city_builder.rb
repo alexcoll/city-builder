@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CityBuilder
   attr_reader :grid, :economy, :population, :happiness, :month, :year,
               :speed, :current_tool, :stats
@@ -20,7 +22,7 @@ class CityBuilder
     @paused
   end
 
-  def set_tool(tool)
+  def select_tool?(tool)
     valid_tools = %i[road residential commercial industrial police fire hospital park bulldoze]
     return false unless valid_tools.include?(tool)
 
@@ -28,7 +30,7 @@ class CityBuilder
     true
   end
 
-  def set_speed(speed)
+  def change_speed(speed)
     @speed = speed.clamp(0, 3)
   end
 
@@ -36,20 +38,20 @@ class CityBuilder
     @paused = !@paused
   end
 
-  def can_build?(x, y)
-    return false unless @grid.in_bounds?(x, y)
-    return false if @current_tool == :bulldoze && @grid.get(x, y) == Tile::EMPTY
+  def can_build?(col, row)
+    return false unless @grid.in_bounds?(col, row)
+    return false if @current_tool == :bulldoze && @grid.tile_at(col, row) == Tile::EMPTY
 
     @economy.can_afford?(@economy.cost_for(@current_tool))
   end
 
-  def place(x, y)
-    return false unless can_build?(x, y)
+  def place_tile?(col, row)
+    return false unless can_build?(col, row)
 
     if @current_tool == :bulldoze
-      handle_bulldoze(x, y)
-    elsif @grid.get(x, y) == Tile::EMPTY
-      handle_build(x, y)
+      perform_bulldoze?(col, row)
+    elsif @grid.tile_at(col, row) == Tile::EMPTY
+      perform_build?(col, row)
     else
       false
     end
@@ -73,26 +75,26 @@ class CityBuilder
     simulate
   end
 
-  def screen_to_grid(sx, sy, camera_x, camera_y, tile_size)
-    [((sx + camera_x) / tile_size).to_i, ((sy + camera_y) / tile_size).to_i]
+  def screen_to_grid(start_x, start_y, camera_x, camera_y, tile_size)
+    [((start_x + camera_x) / tile_size).to_i, ((start_y + camera_y) / tile_size).to_i]
   end
 
   private
 
-  def handle_bulldoze(x, y)
-    was_zonable = Tile.zonable?(@grid.get(x, y))
-    @grid.set(x, y, Tile::EMPTY)
-    @economy.spend(@economy.cost_for(:bulldoze))
+  def perform_bulldoze?(col, row)
+    was_zonable = Tile.zonable?(@grid.tile_at(col, row))
+    @grid.place_tile?(col, row, Tile::EMPTY)
+    @economy.spend?(@economy.cost_for(:bulldoze))
     @stats[:total_bulldozed] += 1
     recalculate_population if was_zonable
     true
   end
 
-  def handle_build(x, y)
+  def perform_build?(col, row)
     cost = @economy.cost_for(@current_tool)
-    return false unless @economy.spend(cost)
+    return false unless @economy.spend?(cost)
 
-    @grid.set(x, y, @current_tool)
+    @grid.place_tile?(col, row, @current_tool)
     @stats[:total_built] += 1
     true
   end
@@ -108,7 +110,7 @@ class CityBuilder
   def collect_taxes
     income = 0
     @grid.developed_zones.each do |x, y|
-      zone = @grid.get(x, y)
+      zone = @grid.tile_at(x, y)
       level = @grid.level_at(x, y)
       income += @economy.tax_for(zone, level)
     end
@@ -118,33 +120,33 @@ class CityBuilder
 
   def grow_buildings
     @grid.development_candidates.each do |x, y|
-      @grid.upgrade(x, y) && add_population(x, y) if rand < growth_chance(x, y)
+      @grid.upgrade_tile?(x, y) && add_population(x, y) if rand < growth_chance(x, y)
     end
   end
 
-  def growth_chance(x, y)
+  def growth_chance(col, row)
     chance = 0.03
-    chance += 0.02 if nearby_service?(x, y)
+    chance += 0.02 if nearby_service?(col, row)
     chance += 0.01 if @happiness > 60
     chance -= 0.01 if @happiness < 40
     chance.clamp(0.0, 0.1)
   end
 
-  def nearby_service?(x, y)
-    @grid.neighbors(x, y).any? { |nx, ny| Tile.service?(@grid.get(nx, ny)) }
+  def nearby_service?(col, row)
+    @grid.neighbors(col, row).any? { |nx, ny| Tile.service?(@grid.tile_at(nx, ny)) }
   end
 
-  def add_population(x, y)
-    return unless @grid.get(x, y) == Tile::RESIDENTIAL
+  def add_population(col, row)
+    return unless @grid.tile_at(col, row) == Tile::RESIDENTIAL
 
-    @population += 10 * @grid.level_at(x, y)
+    @population += 10 * @grid.level_at(col, row)
   end
 
   def recalculate_population
     @population = 0
     @grid.height.times do |y|
       @grid.width.times do |x|
-        next unless @grid.get(x, y) == Tile::RESIDENTIAL
+        next unless @grid.tile_at(x, y) == Tile::RESIDENTIAL
 
         @population += 10 * @grid.level_at(x, y)
       end

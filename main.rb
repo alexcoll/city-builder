@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 system('bundle install') unless system('bundle check', out: File::NULL, err: File::NULL)
 

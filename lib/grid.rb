@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Grid
   DIRECTIONS = [[0, 1], [0, -1], [1, 0], [-1, 0]].freeze
 
@@ -10,46 +12,46 @@ class Grid
     @levels = Array.new(height) { Array.new(width, 0) }
   end
 
-  def get(x, y)
-    return nil unless in_bounds?(x, y)
+  def tile_at(col, row)
+    return nil unless in_bounds?(col, row)
 
-    @tiles[y][x]
+    @tiles[row][col]
   end
 
-  def set(x, y, type)
-    return false unless in_bounds?(x, y)
+  def place_tile?(col, row, tile_type)
+    return false unless in_bounds?(col, row)
 
-    @tiles[y][x] = type
-    @levels[y][x] = 0
+    @tiles[row][col] = tile_type
+    @levels[row][col] = 0
     true
   end
 
-  def level_at(x, y)
-    return 0 unless in_bounds?(x, y)
+  def level_at(col, row)
+    return 0 unless in_bounds?(col, row)
 
-    @levels[y][x]
+    @levels[row][col]
   end
 
-  def upgrade(x, y)
-    return false unless in_bounds?(x, y)
-    return false if @levels[y][x] >= 3
+  def upgrade_tile?(col, row)
+    return false unless in_bounds?(col, row)
+    return false if @levels[row][col] >= 3
 
-    @levels[y][x] += 1
+    @levels[row][col] += 1
     true
   end
 
-  def in_bounds?(x, y)
-    x >= 0 && x < @width && y >= 0 && y < @height
+  def in_bounds?(col, row)
+    col >= 0 && col < @width && row >= 0 && row < @height
   end
 
-  def road_adjacent?(x, y)
-    neighbors(x, y).any? { |nx, ny| @tiles[ny][nx] == Tile::ROAD }
+  def road_adjacent?(col, row)
+    neighbors(col, row).any? { |nx, ny| @tiles[ny][nx] == Tile::ROAD }
   end
 
-  def neighbors(x, y)
+  def neighbors(col, row)
     DIRECTIONS.filter_map do |dx, dy|
-      nx = x + dx
-      ny = y + dy
+      nx = col + dx
+      ny = row + dy
       [nx, ny] if in_bounds?(nx, ny)
     end
   end

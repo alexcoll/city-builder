@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Economy
   COSTS = {
     road: 10,
@@ -31,7 +33,7 @@ class Economy
     @money >= amount
   end
 
-  def spend(amount)
+  def spend?(amount)
     return false unless can_afford?(amount)
 
     @money -= amount

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 RSpec.describe Economy do
@@ -29,18 +31,18 @@ RSpec.describe Economy do
     end
   end
 
-  describe '#spend' do
+  describe '#spend?' do
     it 'deducts money when affordable' do
-      economy.spend(1_000)
+      economy.spend?(1_000)
       expect(economy.money).to eq(49_000)
     end
 
     it 'returns true on success' do
-      expect(economy.spend(100)).to be true
+      expect(economy.spend?(100)).to be true
     end
 
     it 'returns false and does not deduct when unaffordable' do
-      result = economy.spend(60_000)
+      result = economy.spend?(60_000)
       expect(result).to be false
       expect(economy.money).to eq(50_000)
     end
