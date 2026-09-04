@@ -18,7 +18,10 @@ A barebones Cities: Skylines-style game built with the Ruby Gosu game engine.
 
 ## Setup
 
+Install the system libraries (macOS), then the Ruby gems:
+
 ```bash
+brew bundle          # installs SDL2 libs from Brewfile
 bundle install
 ruby main.rb
 ```
@@ -36,7 +39,7 @@ ships a zip containing the source plus a `run.command` launcher:
 3. `chmod +x run.command` (macOS), then double-click `run.command` — or run `ruby main.rb` from a terminal.
 4. First launch installs the Gosu dependency automatically.
 
-Requires Ruby 3.0+ and the Gosu system libraries (on macOS: `brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf`).
+Requires Ruby 3.0+ and the Gosu system libraries (installed via the bundled `Brewfile` on macOS).
 
 ## Controls
 
