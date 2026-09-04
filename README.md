@@ -53,6 +53,40 @@ Requires Ruby 3.0+ and the Gosu system libraries (installed via the bundled `Bre
 | `Space` | Pause |
 | `Esc` | Quit |
 
+## Troubleshooting
+
+### `symbol not found in flat namespace '_OBJC_CLASS_$_NSScreen'` on macOS
+
+If `ruby main.rb` (or any `require "gosu"`) fails with a `LoadError`, the
+pre-built Gosu native extension was linked without the macOS `AppKit` and
+`Foundation` frameworks (Gosu's `extconf.rb` relies on the Homebrew
+`sdl2-config --static-libs` path, which returns empty for SDL2 2.32+ and never
+links AppKit). Rebuild the gem's native extension from source so the required
+frameworks are linked:
+
+```bash
+# 1. Locate the gem's build directory.
+GEM_DIR="$(ruby -e 'print Gem::dir' 2>/dev/null || true)"
+GOSU_ROOT="$(dirname "$(dirname "$(gem which gosu)")")"
+cd "$GOSU_ROOT/ext/gosu"
+
+# 2. Patch extconf.rb so SDL2 falls back to dynamic linking and AppKit/Foundation are linked.
+ruby -i -pe \
+  'sub!(/sdl2-config --static-libs/) { "sdl2-config --libs" }; 
+   sub!(/-framework OpenGL/) { "-framework AppKit -framework Foundation -framework OpenGL" }' \
+  extconf.rb
+
+# 3. Rebuild and install the bundle in place.
+make distclean
+ruby extconf.rb
+make
+cp gosu.bundle ../lib/gosu.bundle
+```
+
+Then `require "gosu"` and `ruby main.rb` should work. This is a
+build-environment fix, so it only needs to be applied to the machine running the
+game — tests and lint run without the Gosu gem.
+
 ## Development
 
 ```bash
