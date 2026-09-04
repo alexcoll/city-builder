@@ -65,4 +65,24 @@ class Economy
   def last_profit
     @last_income - @last_expense
   end
+
+  def to_h
+    {
+      money: @money,
+      income_history: @income_history,
+      expense_history: @expense_history,
+      last_income: @last_income,
+      last_expense: @last_expense
+    }
+  end
+
+  def self.from_h(data)
+    economy = new
+    economy.instance_variable_set(:@money, data['money'])
+    economy.instance_variable_set(:@income_history, data['income_history'])
+    economy.instance_variable_set(:@expense_history, data['expense_history'])
+    economy.instance_variable_set(:@last_income, data['last_income'])
+    economy.instance_variable_set(:@last_expense, data['last_expense'])
+    economy
+  end
 end

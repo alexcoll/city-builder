@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require 'tempfile'
 
 RSpec.describe CityBuilder do
   subject(:game) { described_class.new(20, 15) }
@@ -229,6 +230,49 @@ RSpec.describe CityBuilder do
       gx, gy = game.screen_to_grid(0, 0, 24, 24, 24)
       expect(gx).to eq(1)
       expect(gy).to eq(1)
+    end
+  end
+
+  describe 'save/load' do
+    it 'round-trips state through to_h and from_h' do
+      game.place_tile?(0, 0)
+      game.select_tool?(:residential)
+      game.place_tile?(1, 0)
+      game.grid.upgrade_tile?(1, 0)
+      game.change_speed(2)
+      game.toggle_pause
+
+      restored = described_class.from_h(JSON.parse(JSON.generate(game.to_h)))
+
+      expect(restored.grid.tiles).to eq(game.grid.tiles)
+      expect(restored.grid.levels).to eq(game.grid.levels)
+      expect(restored.population).to eq(game.population)
+      expect(restored.happiness).to eq(game.happiness)
+      expect(restored.month).to eq(game.month)
+      expect(restored.year).to eq(game.year)
+      expect(restored.speed).to eq(game.speed)
+      expect(restored.current_tool).to eq(:residential)
+      expect(restored.economy.money).to eq(game.economy.money)
+      expect(restored.stats).to eq(game.stats)
+    end
+
+    it 'writes and reads a save file' do
+      file = Tempfile.new(['save', '.json'])
+      path = file.path
+      file.close
+
+      game.place_tile?(2, 3)
+      game.save_to(path)
+      restored = described_class.load_from(path)
+
+      expect(restored.grid.tiles).to eq(game.grid.tiles)
+      expect(restored.economy.money).to eq(game.economy.money)
+
+      File.unlink(path)
+    end
+
+    it 'returns nil from load_from when no file exists' do
+      expect(described_class.load_from('/nonexistent/save.json')).to be_nil
     end
   end
 end

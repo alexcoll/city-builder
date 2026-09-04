@@ -36,10 +36,10 @@ class GameWindow < Gosu::Window
     Gosu::KB_9 => '9'
   }.freeze
 
-  def initialize
+  def initialize(game = nil)
     super(1280, 720)
     self.caption = 'City Builder'
-    @game = CityBuilder.new(60, 40)
+    @game = game || CityBuilder.new(60, 40)
     @camera_x = 0.0
     @camera_y = 0.0
     @font = Gosu::Font.new(14)
@@ -50,6 +50,11 @@ class GameWindow < Gosu::Window
     @drag_start_y = 0
     @cam_start_x = 0
     @cam_start_y = 0
+  end
+
+  def close
+    @game.save_to
+    super
   end
 
   def update

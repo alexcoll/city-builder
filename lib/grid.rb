@@ -79,4 +79,15 @@ class Grid
     end
     result
   end
+
+  def to_h
+    { width: @width, height: @height, tiles: @tiles, levels: @levels }
+  end
+
+  def self.from_h(data)
+    grid = new(data['width'], data['height'])
+    grid.instance_variable_set(:@tiles, data['tiles'].map { |row| row.map(&:to_sym) })
+    grid.instance_variable_set(:@levels, data['levels'])
+    grid
+  end
 end
