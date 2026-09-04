@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
+require 'json'
+
 class CityBuilder
+  SAVE_FILE = File.expand_path('~/.city_builder_save.json').freeze
+
   attr_reader :grid, :economy, :population, :happiness, :month, :year,
               :speed, :current_tool, :stats
 
@@ -77,6 +81,44 @@ class CityBuilder
 
   def screen_to_grid(start_x, start_y, camera_x, camera_y, tile_size)
     [((start_x + camera_x) / tile_size).to_i, ((start_y + camera_y) / tile_size).to_i]
+  end
+
+  def to_h
+    {
+      grid: grid.to_h,
+      economy: economy.to_h,
+      population: population,
+      happiness: happiness,
+      month: month,
+      year: year,
+      speed: speed,
+      current_tool: current_tool,
+      stats: stats
+    }
+  end
+
+  def save_to(file = SAVE_FILE)
+    File.write(file, JSON.generate(to_h))
+  end
+
+  def self.from_h(data)
+    game = new(data['grid']['width'], data['grid']['height'])
+    game.instance_variable_set(:@grid, Grid.from_h(data['grid']))
+    game.instance_variable_set(:@economy, Economy.from_h(data['economy']))
+    game.instance_variable_set(:@population, data['population'])
+    game.instance_variable_set(:@happiness, data['happiness'])
+    game.instance_variable_set(:@month, data['month'])
+    game.instance_variable_set(:@year, data['year'])
+    game.instance_variable_set(:@speed, data['speed'])
+    game.instance_variable_set(:@current_tool, data['current_tool'].to_sym)
+    game.instance_variable_set(:@stats, data['stats'].transform_keys(&:to_sym))
+    game
+  end
+
+  def self.load_from(file = SAVE_FILE)
+    return nil unless File.exist?(file)
+
+    from_h(JSON.parse(File.read(file)))
   end
 
   private

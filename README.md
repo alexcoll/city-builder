@@ -10,6 +10,7 @@ A barebones Cities: Skylines-style game built with the Ruby Gosu game engine.
 - Economy with taxes collected from developed zones
 - Population and happiness simulation
 - Bulldoze tool to remove tiles
+- Auto-save on exit and auto-load on startup
 
 ## Requirements
 
@@ -27,6 +28,14 @@ ruby main.rb
 ```
 
 `main.rb` also runs `bundle install` automatically if dependencies aren't present.
+
+Your city is saved automatically to `~/.city_builder_save.json` when the game
+exits, and that save is loaded automatically the next time you launch. To start
+a brand-new city instead, pass `--new`:
+
+```bash
+ruby main.rb --new
+```
 
 ## Releases / Deployment
 

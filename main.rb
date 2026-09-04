@@ -9,4 +9,11 @@ require_relative 'lib/economy'
 require_relative 'lib/city_builder'
 require_relative 'lib/window'
 
-GameWindow.new.show
+new_game = ARGV.include?('--new')
+game = if new_game
+         CityBuilder.new(60, 40)
+       else
+         CityBuilder.load_from || CityBuilder.new(60, 40)
+       end
+
+GameWindow.new(game).show
